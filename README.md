@@ -1,3 +1,4 @@
+
 # 🧠 Local Mind
 
 <div align="center">
@@ -8,6 +9,19 @@
   <img src="https://img.shields.io/badge/WebSearch-Tavily-blue?style=flat-square">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square">
 </div>
+
+---
+
+## 📸 Demo
+
+<details>
+<summary>Click to expand</summary>
+
+<img width="3192" height="1828" alt="Screenshot 2025-07-17 015536" src="https://github.com/user-attachments/assets/6f14ba35-d590-4db5-89e8-c15a2994503d" />
+<img width="3198" height="1840" alt="Screenshot 2025-07-17 021432" src="https://github.com/user-attachments/assets/d5348774-58d7-46fd-a7d3-3c395755e52a" />
+<img width="3196" height="1826" alt="Screenshot 2025-07-17 001636" src="https://github.com/user-attachments/assets/029e21a6-15b7-4d10-be54-5ac4c3445b33" />
+
+</details>
 
 ---
 
@@ -214,18 +228,6 @@ See [http://localhost:8000/docs](http://localhost:8000/docs) for full details.
 * 🧠 **Multi-source AI:** Mixes your files and the web.
 * ⚡ **Lightning Fast:** No cloud lag, no rate limits.
 * 🧩 **Composable:** Easy to extend or add your own tools.
-
----
-
-## 📸 Demo
-
-<details>
-<summary>Click to expand</summary>
-
-<img width="3192" height="1828" alt="Screenshot 2025-07-17 015536" src="https://github.com/user-attachments/assets/6f14ba35-d590-4db5-89e8-c15a2994503d" />
-<img width="3196" height="1826" alt="Screenshot 2025-07-17 001636" src="https://github.com/user-attachments/assets/029e21a6-15b7-4d10-be54-5ac4c3445b33" />
-
-</details>
 
 ---
 
