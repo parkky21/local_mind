@@ -222,7 +222,8 @@ See [http://localhost:8000/docs](http://localhost:8000/docs) for full details.
 <details>
 <summary>Click to expand</summary>
 
-![Local Mind Chat Screenshot](assets/screenshot1.png)
+<img width="3192" height="1828" alt="Screenshot 2025-07-17 015536" src="https://github.com/user-attachments/assets/6f14ba35-d590-4db5-89e8-c15a2994503d" />
+<img width="3196" height="1826" alt="Screenshot 2025-07-17 001636" src="https://github.com/user-attachments/assets/029e21a6-15b7-4d10-be54-5ac4c3445b33" />
 
 </details>
 
