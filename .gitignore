@@ -1,0 +1,33 @@
+# Global ignores (Node + Python)
+__pycache__/
+*.py[cod]
+*.env
+*.venv/
+.env
+.env.local
+.DS_Store
+
+# VSCode/IDE files
+.idea/
+.vscode/
+
+# Node/Next.js (client)
+client/.next/
+client/node_modules/
+client/package-lock.json
+client/.env.local
+client/.env
+client/.idea/
+
+# Python/venv/model/index (server)
+server/__pycache__/
+server/.venv/
+server/.env
+server/model/
+server/store_rag/
+server/data/
+server/.idea/
+server/.vscode/
+
+# Log files
+*.log

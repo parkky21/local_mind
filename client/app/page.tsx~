@@ -1,0 +1,60 @@
+"use client";
+import Link from "next/link";
+import { FileText, Search } from "lucide-react";
+
+export default function Home() {
+  return (
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center px-4">
+        <h1 className="text-5xl font-extrabold text-white mb-16 drop-shadow-[0_0_15px_rgba(0,255,255,0.7)]">
+          Local Mind
+        </h1>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-12 w-full max-w-4xl">
+          {/* Talk with Documents */}
+          <Link
+              href="/rag-chat"
+              className="group block bg-[#111111] border border-cyan-600 rounded-2xl p-8 flex flex-col items-center text-center
+                     hover:scale-105 transform transition-shadow shadow-lg hover:shadow-2xl"
+          >
+            <FileText
+                size={56}
+                className="text-cyan-400 mb-4 drop-shadow-[0_0_10px_rgba(0,255,255,0.6)] group-hover:text-cyan-300 transition-colors"
+            />
+            <h2 className="text-2xl font-semibold text-white mb-2">
+              Talk with Documents
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Upload your own PDFs & Docs and chat with them in natural language.
+            </p>
+            <span className="inline-block px-6 py-2 bg-cyan-500 text-black font-medium rounded-full
+                            group-hover:bg-cyan-600 transition-colors">
+            Get Started →
+          </span>
+          </Link>
+
+          {/* Quick Research */}
+          <Link
+              href="/quick-research"
+              className="group block bg-[#111111] border border-cyan-600 rounded-2xl p-8 flex flex-col items-center text-center
+                     hover:scale-105 transform transition-shadow shadow-lg hover:shadow-2xl"
+          >
+            <Search
+                size={56}
+                className="text-cyan-400 mb-4 drop-shadow-[0_0_10px_rgba(0,255,255,0.6)] group-hover:text-cyan-300 transition-colors"
+            />
+            <h2 className="text-2xl font-semibold text-white mb-2">
+              Quick Research
+            </h2>
+            <p className="text-gray-400 mb-6">
+              Ask anything on the web with lightning-fast searches.
+            </p>
+            <span className="inline-block px-6 py-2 bg-cyan-500 text-black font-medium rounded-full
+                            group-hover:bg-cyan-600 transition-colors">
+            Get Started →
+          </span>
+          </Link>
+        </div>
+      </div>
+  );
+}
+

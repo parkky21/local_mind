@@ -1,0 +1,5 @@
+import WebSearchApp from "@/components/NeonChat";
+
+export default function QuickSearch() {
+    return <WebSearchApp />;
+}

@@ -1,0 +1,447 @@
+"use client";
+
+import React, { useState, useRef, useEffect } from "react";
+import {
+    Send,
+    MessageCircle,
+    Trash2,
+    UploadCloud,
+    ChevronLeft,
+    ChevronRight,
+} from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import axios from "axios";
+import Link from "next/link";
+
+interface SidebarProps {
+    collapsed: boolean;
+    onToggle: () => void;
+    onSelectFile: (file: string) => void;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+const Sidebar: React.FC<SidebarProps> = ({
+                                             collapsed,
+                                             onToggle,
+                                             onSelectFile,
+                                         }) => {
+    const [files, setFiles] = useState<string[]>([]);
+    const [uploading, setUploading] = useState(false);
+
+
+    const fetchFiles = async () => {
+        try {
+            const res = await axios.get<{ files: string[] }>(
+                "http://localhost:8000/rag/files/"
+            );
+            setFiles(res.data.files);
+        } catch (e) {
+            console.error("Failed to list files", e);
+        }
+    };
+
+    useEffect(() => {
+        fetchFiles();
+    }, []);
+
+    const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) return;
+        setUploading(true);
+        const form = new FormData();
+        form.append("file", e.target.files[0]);
+        try {
+            await axios.post(`${API_BASE}/rag/upload/`, form, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            await fetchFiles();
+        } catch (e) {
+            console.error("Upload error", e);
+        } finally {
+            setUploading(false);
+            e.target.value = "";
+        }
+    };
+
+    const handleDelete = async (file: string) => {
+        if (!confirm(`Delete ${file}?`)) return;
+        try {
+            await axios.delete(`${API_BASE}/rag/delete/${file}`);
+            await fetchFiles();
+        } catch (e) {
+            console.error("Delete failed", e);
+        }
+    };
+
+    return (
+        <div
+            className={`
+        flex flex-col
+        bg-gradient-to-b from-[#111] to-[#000]
+        border-r border-gray-800
+        transition-all duration-300
+        ${collapsed ? "w-16" : "w-64"}
+      `}
+        >
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 h-12">
+                {!collapsed && (
+                    <h2 className="text-lg font-semibold text-white">Documents</h2>
+                )}
+                <button
+                    onClick={onToggle}
+                    className="p-1 text-gray-400 hover:text-gray-200"
+                >
+                    {collapsed ? <ChevronRight /> : <ChevronLeft />}
+                </button>
+            </div>
+
+            {/* Upload button */}
+            {!collapsed && (
+                <div className="px-4 mb-4">
+                    <label
+                        className="
+              flex items-center justify-center space-x-2
+              px-3 py-2
+              bg-cyan-600 hover:bg-cyan-500
+              rounded-lg
+              cursor-pointer
+              text-sm font-medium
+              transition
+            "
+                    >
+                        <UploadCloud size={16} className="text-white" />
+                        <span className="text-white">
+              {uploading ? "Uploading…" : "Upload Doc"}
+            </span>
+                        <input
+                            type="file"
+                            onChange={handleUpload}
+                            className="hidden"
+                            disabled={uploading}
+                        />
+                    </label>
+                </div>
+            )}
+
+            {/* File list */}
+            <ul className="flex-1 overflow-y-auto space-y-1 px-2">
+                {files.map((f) => (
+                    <li
+                        key={f}
+                        onClick={() => !collapsed && onSelectFile(f)}
+                        className={`
+              flex items-center justify-between
+              px-3 py-2
+              rounded-lg
+              hover:bg-gray-800
+              cursor-pointer
+              transition
+              ${collapsed ? "justify-center" : ""}
+            `}
+                    >
+            <span
+                className={`truncate text-gray-300 ${
+                    collapsed ? "hidden" : "block"
+                }`}
+            >
+              {f}
+            </span>
+                        {!collapsed && (
+                            <button onClick={() => handleDelete(f)}>
+                                <Trash2
+                                    size={14}
+                                    className="text-red-500 hover:text-red-400"
+                                />
+                            </button>
+                        )}
+                    </li>
+                ))}
+                {files.length === 0 && !collapsed && (
+                    <li className="text-gray-600 text-sm px-3">No documents yet</li>
+                )}
+            </ul>
+
+            {/* Footer action */}
+            {/*{!collapsed && (*/}
+            {/*    <div className="px-4 py-2 border-t border-gray-800">*/}
+            {/*        <button*/}
+            {/*            onClick={() => alert("another action")}*/}
+            {/*            className="*/}
+            {/*  w-full text-left text-sm font-medium*/}
+            {/*  text-cyan-400 hover:text-cyan-300*/}
+            {/*  transition*/}
+            {/*"*/}
+            {/*        >*/}
+            {/*            ⚙️ Other Option*/}
+            {/*        </button>*/}
+            {/*    </div>*/}
+            {/*)}*/}
+        </div>
+    );
+};
+
+const RagChatApp = () => {
+    const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+    const [messages, setMessages] = useState<any[]>([]);
+    const [input, setInput] = useState("");
+    const [isLoading, setIsLoading] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [pendingSearchText, setPendingSearchText] = useState<string | null>(null);
+    const [threadId, setThreadId] = useState<number>(() => Date.now()); // initial value
+
+
+    // Auto-scroll on new message
+    useEffect(() => {
+        scrollRef.current?.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth",
+        });
+    }, [messages]);
+
+    useEffect(() => {
+        setThreadId(Date.now());
+    }, []);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!input.trim() || isLoading) return;
+
+        setMessages((m) => [
+            ...m,
+            { type: "user", content: input.trim() },
+            { type: "assistant", content: "", tokens: [] },
+        ]);
+        setInput("");
+        setIsLoading(true);
+        setIsTyping(true);
+
+        try {
+            const res = await fetch(
+                `${API_BASE}/rag/stream?user_input=${encodeURIComponent(
+                    input
+                )}&thread_id=${threadId}`
+            );
+            const reader = res.body!.getReader();
+            const dec = new TextDecoder();
+            let buf = "";
+            let done = false;
+
+            while (!done) {
+                const { value, done: streamDone } = await reader.read();
+                if (streamDone) break;
+                buf += dec.decode(value, { stream: true });
+
+                let idx;
+                while ((idx = buf.indexOf("\n\n")) !== -1) {
+                    const raw = buf.slice(0, idx).trim();
+                    buf = buf.slice(idx + 2);
+
+                    let evType: string | null = null;
+                    let dataObj: any = null;
+
+
+
+                    raw.split("\n").forEach((line) => {
+                        if (line.startsWith("event: ")) evType = line.slice(7);
+                        if (line.startsWith("data: ")) {
+                            try {
+                                dataObj = JSON.parse(line.slice(6));
+                            } catch {}
+                        }
+                    });
+                    console.log({ raw, evType, dataObj });
+                   if (evType === "search" && dataObj?.content) {
+                        // show spinner + text
+                       console.log("🔥 pendingSearchText →", dataObj.content);
+                             setPendingSearchText(dataObj.content);
+                         continue;
+                       }
+                    if (evType === "token" && dataObj) {
+                        // first real content → clear the spinner
+                        setPendingSearchText(null);
+                        setMessages((m) => {
+                            const c = [...m];
+                            let i = c.length - 1;
+                            while (i >= 0 && c[i].type !== "assistant") i--;
+                            if (i < 0) return m;
+                            c[i].tokens = c[i].tokens || [];
+                            if (c[i].tokens.at(-1) !== dataObj.content) {
+                                c[i].tokens.push(dataObj.content);
+                            }
+                            c[i].content = c[i].tokens.join("");
+                            return c;
+                        });
+                    }
+                    else if (evType === "done") {
+                        done = true;
+                        setIsTyping(false);
+                    }
+                    else if (evType === "error") {
+                        setMessages((m) => [
+                            ...m,
+                            { type: "error", content: dataObj.error },
+                        ]);
+                        done = true;
+                        setIsTyping(false);
+                    }
+                }
+            }
+        } catch {
+            setMessages((m) => [
+                ...m,
+                { type: "error", content: "Connection error." },
+            ]);
+            setIsTyping(false);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSelectFile = (file: string) => {
+        setMessages([{ type: "system", content: `Loaded document: ${file}` }]);
+    };
+
+    return (
+        <div className="flex h-screen bg-black text-gray-100 font-mono">
+            <Sidebar
+                collapsed={sidebarCollapsed}
+                onToggle={() => setSidebarCollapsed((c) => !c)}
+                onSelectFile={handleSelectFile}
+            />
+
+            <div className="relative flex-1 flex flex-col font-mono">
+                {/* Top bar */}
+                <Link href={"/"}>
+                    <header className="h-12 flex items-center px-4 border-b border-gray-800 bg-black z-10">
+                        <h1
+                            className="text-xl font-semibold"
+                        >Local Mind</h1>
+                    </header>
+                </Link>
+
+                {/* Scrollable messages (centered, no visible scrollbars) */}
+                <div
+                    ref={scrollRef}
+                    className="absolute inset-x-0 top-12 bottom-24 overflow-y-auto px-4 pt-6 sm:max-w-2xl mx-auto"
+                    style={{ scrollbarWidth: "none" }}
+                >
+                    {/* hide webkit scrollbar */}
+                    <style jsx>{`
+            div::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+
+
+                    {messages.length === 0 ? (
+                        <div className="text-center text-gray-600 mt-16">
+                            <MessageCircle size={48} className="mx-auto mb-2" />
+                            Ask me anything…
+                        </div>
+                    ) : (
+                        messages.map((m, i) => {
+                            if (m.type === "user") {
+                                const isLastUserMessage = (() => {
+                                    // Next message exists and is the "assistant" placeholder (empty)
+                                    const next = messages[i + 1];
+                                    return (
+                                        pendingSearchText &&
+                                        next &&
+                                        next.type === "assistant" &&
+                                        (!next.content || next.content === "") // or next.tokens is empty
+                                    );
+                                })();
+                                return (
+                                    <div key={i} className="mb-6">
+                                        <h1 key={i} className="text-3xl font-semibold mb-6">
+                                            {m.content}
+                                        </h1>
+                                        {isLastUserMessage && (
+                                            <div className="flex items-center space-x-2 text-gray-400 mt-2">
+                                                <div className="animate-spin h-4 w-4 border-2 border-t-2 border-gray-400 rounded-full" />
+                                                <span className="text-sm">{pendingSearchText}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+
+                                );
+                            }
+                            if (m.type === "assistant") {
+                                return (
+                                     <div key={i} className="mb-8">
+                                             <div className="prose prose-invert">
+                                                 <ReactMarkdown>{m.content}</ReactMarkdown>
+                                             </div>
+                                             {isTyping && i === messages.length - 1 && (
+                                                 <span className="inline-block w-2 h-5 bg-gray-400 animate-pulse" />
+                                             )}
+                                             <div className="flex justify-between items-center text-sm text-gray-500 mt-4">
+                                                 <button
+                                                     onClick={() => navigator.clipboard.writeText(m.content)}
+                                                     className="hover:underline"
+                                                 >
+                                                     Copy
+                                                 </button>
+                                          </div>
+                                     </div>
+                                );
+                            }
+                            if (m.type === "system") {
+                                return (
+                                    <div key={i} className="mb-4 text-sm text-gray-400">
+                                        {m.content}
+                                    </div>
+                                );
+                            }
+                            if (m.type === "error") {
+                                return (
+                                    <div key={i} className="mb-4 text-red-500">
+                                        {m.content}
+                                    </div>
+                                );
+                            }
+                            return null;
+                        })
+                    )}
+                </div>
+
+                {/* Floating, pill-shaped input bar */}
+                <footer className="fixed inset-x-0 bottom-4 px-4 flex justify-center pointer-events-none z-20 h-12">
+                    <form
+                        onSubmit={handleSubmit}
+                        className="
+              pointer-events-auto
+              flex items-center w-full max-w-xl
+              bg-[#111111]
+              border border-[#2e2e2e]
+              rounded-full
+              px-5 py-2
+              shadow-[0_0_10px_rgba(0,0,0,0.4)]
+            "
+                    >
+                        <input
+                            type="text"
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder="Ask a follow-up…"
+                            disabled={isLoading}
+                            className="flex-1 bg-transparent text-white placeholder-gray-400 focus:outline-none text-sm"
+                        />
+                        <button
+                            type="submit"
+                            disabled={!input.trim() || isLoading}
+                            className="text-cyan-400 hover:text-cyan-500 disabled:opacity-30"
+                        >
+                            {isLoading ? "…" : <Send size={16} />}
+                        </button>
+                    </form>
+                </footer>
+            </div>
+        </div>
+    );
+};
+
+export default RagChatApp;
