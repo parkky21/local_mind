@@ -4,8 +4,83 @@
   <img src="https://img.shields.io/badge/Frontend-Next.js-000?logo=nextdotjs&logoColor=white&style=flat-square">
   <img src="https://img.shields.io/badge/Backend-FastAPI-009688?logo=fastapi&style=flat-square">
   <img src="https://img.shields.io/badge/RAG-LlamaIndex-blueviolet?style=flat-square">
+  <img src="https://img.shields.io/badge/LLM-Jan--nano-brightgreen?style=flat-square">
+  <img src="https://img.shields.io/badge/WebSearch-Tavily-blue?style=flat-square">
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square">
 </div>
+
+---
+
+## 🧑‍💻 Requirements
+
+- **Tavily Search API Key:**  
+  Local Mind uses [Tavily Search](https://app.tavily.com/home) to fetch live web results for its research agent.  
+  - **Get your free Tavily API key here:** [https://app.tavily.com/home](https://app.tavily.com/home)
+  - Add your key to your `.env` file as:
+    ```
+    TAVILY_API_KEY=your-key-here
+    ```
+  - This is required for web research to function!
+
+- **Local LLM Model:**  
+  Local Mind runs a quantized [Jan-nano](https://huggingface.co/Menlo/Jan-nano) model on your machine, so all your data stays private.
+
+  - **What is Jan-nano?**  
+    Jan-nano is a highly efficient, open-source LLM by [Menlo](https://huggingface.co/Menlo/Jan-nano), specifically designed for running on local CPUs and resource-limited hardware, making it perfect for private, local AI.
+    - Trained on high-quality English datasets.
+    - Optimized for speed and context length.
+    - Well-suited for chat, question answering, and code.
+
+  - **Quantized Model Downloads:**  
+    Local Mind supports quantized GGUF versions for best performance on your system.
+    - Choose a quantized file (`*.gguf`) from [this list](https://huggingface.co/Menlo/Jan-nano-gguf/tree/main).
+    - Download the version that matches your hardware and put it in your `server/model/` or the main server directory.
+
+    | Model Variant | RAM Required | File Size | Download Link |
+    |--------------|-------------|-----------|--------------|
+    | Q4, Q5, Q6   | Varies      | ~1-2GB    | [Choose here](https://huggingface.co/Menlo/Jan-nano-gguf/tree/main) |
+
+---
+
+## 🚀 Quick Start
+
+> **You need both a Tavily API key and a quantized Jan-nano GGUF model file!**
+
+1. **Get your [Tavily API Key](https://app.tavily.com/home)**  
+   and add it to `server/.env`:
+```
+
+TAVILY\_API\_KEY=your-key-here
+
+```
+
+2. **Download a quantized Jan-nano model:**  
+[Pick from Jan-nano GGUF releases](https://huggingface.co/Menlo/Jan-nano-gguf/tree/main)  
+and put your chosen `.gguf` file in `server/model/`.
+
+3. **Follow previous setup for server and client...**
+
+---
+
+## 🧠 About Jan-nano
+
+- **Jan-nano** is a state-of-the-art, efficient LLM built for privacy, low resource usage, and versatility.
+- [Model card & benchmarks](https://huggingface.co/Menlo/Jan-nano)
+- [Quantized downloads & sizes](https://huggingface.co/Menlo/Jan-nano-gguf/tree/main)
+- Pick Q4 for low RAM, Q5/Q6 for best quality if you have more resources.
+
+---
+
+## 🕸️ About Tavily Search
+
+- Tavily is a fast, privacy-friendly web search API for AI research agents.
+- Get your API key at [https://app.tavily.com/home](https://app.tavily.com/home).
+- Enables Local Mind to find and cite up-to-date answers beyond your files.
+
+---
+
+*See the rest of the README above for setup, API, and use cases!*
+
 
 ---
 
