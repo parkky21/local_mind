@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/RAG-LlamaIndex-blueviolet?style=flat-square">
   <img src="https://img.shields.io/badge/LLM-Jan--nano-brightgreen?style=flat-square">
   <img src="https://img.shields.io/badge/WebSearch-Tavily-blue?style=flat-square">
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square">
+<!--   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square"> -->
 </div>
 
 ---
